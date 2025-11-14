@@ -1,0 +1,78 @@
+version: "3.9"
+
+# docker managed persistent volumes
+volumes:
+  data:
+  video:
+  zmlogs:
+  weblogs:
+  db:
+  zmconfig:
+
+services:
+
+  # MariaDB container with healthcheck
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --default-time-zone=${TZ}
+    environment:
+      MYSQL_PASSWORD: ${ZM_DB_PASS}
+      MYSQL_DATABASE: ${ZM_DB_NAME}
+      MYSQL_USER: ${ZM_DB_USER}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 1m
+      start_interval: 10s
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      - db:/var/lib/mysql
+
+  # MLAPI container    
+  mlapi:
+    image: ghcr.io/jantman/docker-zm-mlapi:latest
+    container_name: mlapi
+    restart: unless-stopped
+    depends_on:
+      - zm
+    environment:
+      TZ: ${TZ}
+    ports:
+      - ${EXT_MLAPI}:80
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - data:/var/lib/zmeventnotification
+      - video:/var/cache/zoneminder
+      - ./mlapiconfig.ini:/etc/mlapiconfig.ini
+      - ./secrets.ini:/etc/secrets.ini
+
+# Zoneminder container
+  zm:
+    image: kevinruffus/docker-zoneminder:latest
+    container_name: zm
+    restart: unless-stopped
+    shm_size: ${SHM_SIZE}
+    depends_on:
+      - mariadb
+    environment:
+      ZM_DB_PASS: ${ZM_DB_PASS}
+      ZM_DB_NAME: ${ZM_DB_NAME}
+      ZM_DB_USER: ${ZM_DB_USER}
+      ZM_DB_HOST: ${ZM_DB_HOST}
+      TZ: ${TZ}
+    ports:
+      - ${EXT_HTTP}:80
+    tmpfs:
+      - /run
+      - /tmp   
+    volumes:
+      - video:/var/cache/zoneminder
+      - zmlogs:/var/log/zm
+      - weblogs:/var/log/apache2
+      - zmconfig:/etc/zm
