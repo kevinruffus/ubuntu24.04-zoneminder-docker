@@ -1,39 +1,34 @@
 # Base Image
-FROM debian:13-slim
+FROM ubuntu:noble
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update \
-    && apt-get upgrade --yes \
-    && apt-get install --yes \
-         apache2 \
-         build-essential \
-         cpanminus \
-         ffmpeg \
-         gifsicle \
-         git \
-         gnupg2 \
-         libapache2-mod-php \
-         libconfig-inifiles-perl \
-         libcrypt-mysql-perl \
-         libcrypt-eksblowfish-perl \
-         libmodule-build-perl \
-         libyaml-perl \
-         libjson-perl \
-         liblwp-protocol-https-perl \
-         libgeos-dev \
-         lsb-release \
-         mariadb-client \
-         php \
-         php-mysql \
-         python3-pip \
-         python3-requests \
-         python3-opencv \
-         s6 \
-         wget \
-         nano \
-         zoneminder \
-    && /usr/bin/pip install --break-system-packages pyzm \
-    && apt-get clean \
+    && apt upgrade -y \
+    && apt install -y \
+        python3-opencv \
+        python3-requests \
+        python3-pip \
+        libapache2-mod-php \
+        liblwp-protocol-https-perl \
+        libcrypt-mysql-perl \
+        mariadb-client \
+        libmodule-build-perl \
+        libcrypt-eksblowfish-perl \
+        git \
+        php-mysql \
+        gifsicle \
+        gnupg2 \
+        lsb-release \
+        cpanminus \
+        libyaml-perl \
+        libjson-perl \
+        libgeos-dev \
+        s6 \
+        nano \
+        ffmpeg \
+    && apt install -y zoneminder --no-install-recommends \
+    && pip install --break-system-packages pyzm \
+    && apt clean \
     && a2enmod rewrite \
     && a2enmod cgi \
     && a2enmod headers \

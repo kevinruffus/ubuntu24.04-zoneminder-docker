@@ -3,3 +3,8 @@ cache/
 zm-log/
 apache2-log/
 db/
+docker-compose.yml
+docker-compose-mlapi.yml
+LICENSE
+README.md
+.gitignore
