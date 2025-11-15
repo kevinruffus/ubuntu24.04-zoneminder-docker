@@ -13,6 +13,10 @@ mysql_ready() {
     mariadb-admin ping --host=$ZM_DB_HOST --user=$ZM_DB_USER --password=$ZM_DB_PASS > /dev/null 2>&1
 }
 
+if [ -e /etc/apache2/conf-enabled/zoneminder.conf ]; then
+    
+fi
+
 # check if Directory inside of /var/cache/zoneminder are present.
 if [ ! -d /var/cache/zoneminder/events ]; then
     echo "Creating /var/cache/zoneminder subdirectories and setting permissions"
@@ -29,6 +33,12 @@ chmod -R 770 /etc/zm /var/log/zm
 
 echo "Setting PHP timezone"
 sed -i "s|;date\.timezone =.*|date.timezone = ${TZ}|" /etc/php/8.4/apache2/php.ini
+
+# Configures security options in security.conf
+echo "Configuring Apache security settings"
+sed -i "s/ServerTokens OS/ServerTokens Prod/" /etc/apache2/conf-available/security.conf
+sed -i "s/ServerSignature On/ServerSignature Off/" /etc/apache2/conf-available/security.conf
+sed -i 's/#Header set X-Content-Type-Options: "nosniff"/Header set X-Content-Type-Options: "nosniff"/' /etc/apache2/conf-available/security.conf
 
 echo "Setting up directories in /run tmpfs"
 install -m 0755 -o root -g root -d /run/apache2

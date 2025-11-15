@@ -5,28 +5,31 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update \
     && apt upgrade -y \
     && apt install -y \
-        python3-opencv \
+        libapache2-mod-php \
+        && apt install -y --no-install-recommends ffmpeg \
+        && apt install -y --no-install-recommends zoneminder \
+        && apt install -y --no-install-recommends python3-opencv \
+        && apt install -y mariadb-client \
+        nano \
+        gnupg2 \
+        lsb-release\
+        
+
         python3-requests \
         python3-pip \
-        libapache2-mod-php \
+        
         liblwp-protocol-https-perl \
         libcrypt-mysql-perl \
-        mariadb-client \
         libmodule-build-perl \
         libcrypt-eksblowfish-perl \
         git \
-        php-mysql \
         gifsicle \
-        gnupg2 \
-        lsb-release \
         cpanminus \
         libyaml-perl \
         libjson-perl \
         libgeos-dev \
         s6 \
-        nano \
-        ffmpeg \
-    && apt install -y zoneminder --no-install-recommends \
+    
     && pip install --break-system-packages pyzm \
     && apt clean \
     && a2enmod rewrite \
